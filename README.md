@@ -11,7 +11,3 @@ add to gemfile
 ```bash
 $ cargo run https://website.org
 ```
-
-```
-
-```
