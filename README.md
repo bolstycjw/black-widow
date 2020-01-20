@@ -6,8 +6,6 @@ Adapted from [tensor-programming/rust_web_crawler](https://github.com/tensor-pro
 
 ## Usage
 
-add to gemfile
-
 ```bash
 $ cargo run https://website.org
 ```
