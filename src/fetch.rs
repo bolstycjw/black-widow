@@ -1,14 +1,15 @@
 extern crate http;
 
 use http::StatusCode;
-use std::collections::HashMap;
 use std::fmt;
 use std::sync::mpsc::channel;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use url::{ParseError, Url};
 
 use super::parse;
+use super::parse::Link;
 
 const TIMEOUT: u64 = 10;
 
@@ -84,7 +85,7 @@ pub fn fetch_url(url: &Url) -> Result<String, Box<dyn std::error::Error>> {
 pub fn fetch_all_links(
     url: &Url,
     domain: &str,
-) -> Result<Vec<HashMap<String, String>>, Box<dyn std::error::Error>> {
+) -> Result<Vec<Arc<Link>>, Box<dyn std::error::Error>> {
     let html_src = fetch_url(url)?.to_string();
     let dom = parse::parse_html(&html_src);
 

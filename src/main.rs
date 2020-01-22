@@ -1,3 +1,5 @@
+extern crate serde;
+extern crate serde_json;
 extern crate markup5ever_rcdom as rcdom;
 extern crate reqwest;
 extern crate tokio;
@@ -30,11 +32,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let now = Instant::now();
         for url_state in crawler::crawl(&domain, &start_url) {
             match url_state {
-                UrlState::Accessible(_) => {
+                (UrlState::Accessible(_), _) => {
                     success_count += 1;
                 }
-                status => {
+                (status, maybe_link) => {
                     fail_count += 1;
+                    match status {
+                        UrlState::BadStatus(_, _) => {
+                            match maybe_link {
+                                 Some(link) =>  println!("{}", serde_json::to_string(&*link)?),
+                                 None => {}
+                            }
+                        },
+                        _ => {}
+                    }
                     println!("{}", status);
                 }
             }

@@ -1,11 +1,17 @@
-use std::collections::HashMap;
-use std::string::String;
-
 use super::fetch::build_url;
 use html5ever::interface::Attribute;
 use html5ever::parse_document;
 use html5ever::tendril::TendrilSink;
 use rcdom::{Handle, NodeData, RcDom};
+use serde::Serialize;
+use std::collections::HashMap;
+use std::sync::Arc;
+
+#[derive(Clone, Debug, Serialize)]
+pub struct Link {
+    pub href: Option<String>,
+    pub resolved: Option<String>,
+}
 
 pub fn parse_html(source: &str) -> RcDom {
     parse_document(RcDom::default(), Default::default())
@@ -14,7 +20,7 @@ pub fn parse_html(source: &str) -> RcDom {
         .unwrap()
 }
 
-pub fn get_links(handle: Handle, domain: &str, page: &str) -> Vec<HashMap<String, String>> {
+pub fn get_links(handle: Handle, domain: &str, page: &str) -> Vec<Arc<Link>> {
     let mut links = vec![];
     let mut anchor_tags = vec![];
 
@@ -37,7 +43,17 @@ pub fn get_links(handle: Handle, domain: &str, page: &str) -> Vec<HashMap<String
                     match url.scheme() {
                         "http" | "https" => {
                             link_attrs.insert("resolved".to_string(), url.to_string());
-                            links.push(link_attrs)
+                            let link = Link {
+                                href: match link_attrs.get("href") {
+                                    Some(val) => Some(val.to_owned()),
+                                    _ => None,
+                                },
+                                resolved: match link_attrs.get("resolved") {
+                                    Some(val) => Some(val.to_owned()),
+                                    _ => None,
+                                },
+                            };
+                            links.push(Arc::new(link));
                         }
                         _ => {}
                     }
